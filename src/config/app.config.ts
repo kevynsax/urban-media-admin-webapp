@@ -3,7 +3,7 @@ const isProduction = import.meta.env.PROD;
 export const AppConfig = {
   get baseUrl(): string {
     if (isProduction) {
-      return 'https://urbi.kirschnerklava.com/api';
+      return '/api';
     }
     return 'http://localhost:8080/api';
   },
