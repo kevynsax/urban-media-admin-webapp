@@ -1,6 +1,6 @@
-# Urban Media Admin Web App
+# Urbi Admin Web App
 
-A modern React web application for managing Urban Media video content. Built with React, TypeScript, Redux Toolkit, and Material-UI.
+A modern React web application for managing Urbi video content. Built with React, TypeScript, Redux Toolkit, and Material-UI.
 
 ## Features
 
@@ -165,4 +165,4 @@ VITE_API_BASE_URL=http://localhost:8080/api
 
 ## License
 
-Private - Urban Media Project
+Private - Urbi Project

@@ -8,14 +8,7 @@ export const AppConfig = {
     return 'http://localhost:8080/api';
   },
 
-  appName: 'Urban Media Admin',
-
-  endpoints: {
-    login: '/login',
-    videos: '/videos',
-    videoStatus: (id: string) => `/videos/status/${id}`,
-    deleteVideo: (id: string) => `/videos/${id}`,
-  },
+  appName: 'Urbi Admin',
 
   storage: {
     tokenKey: 'auth_token',

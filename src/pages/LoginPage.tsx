@@ -88,7 +88,7 @@ const LoginPage = () => {
                             WebkitTextFillColor: 'transparent',
                         }}
                     >
-                        Urban Media Admin
+                        Urbi Admin
                     </Typography>
 
                     <form onSubmit={handleSubmit}>
