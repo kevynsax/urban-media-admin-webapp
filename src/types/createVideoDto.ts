@@ -4,4 +4,5 @@ export interface CreateVideoDto {
     videoFile: File;
     linkToAction: string;
     publishStatus: PublishStatus;
+    showLinkAt: number;
 }

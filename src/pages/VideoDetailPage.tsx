@@ -47,6 +47,7 @@ const VideoDetailPage = () => {
     video?.publishStatus || 'unpublished'
   );
   const [linkToAction, setLinkToAction] = useState(video?.linkToAction || '');
+  const [showLinkAt, setShowLinkAt] = useState(video?.showLinkAt || 0);
   const [isUpdating, setIsUpdating] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
@@ -54,6 +55,7 @@ const VideoDetailPage = () => {
     if (video) {
       setPublishStatus(video.publishStatus);
       setLinkToAction(video.linkToAction);
+      setShowLinkAt(video.showLinkAt || 0);
     }
   }, [video]);
 
@@ -64,7 +66,7 @@ const VideoDetailPage = () => {
       await dispatch(
         updateVideoStatus({
           id,
-          data: { publishStatus, linkToAction },
+          data: { publishStatus, linkToAction, showLinkAt },
         })
       ).unwrap();
       dispatch(
@@ -266,6 +268,16 @@ const VideoDetailPage = () => {
                 onChange={(e) => setLinkToAction(e.target.value)}
                 fullWidth
                 placeholder="https://example.com"
+              />
+
+              <TextField
+                label="Show Link At (seconds)"
+                type="number"
+                value={showLinkAt}
+                onChange={(e) => setShowLinkAt(parseInt(e.target.value) || 0)}
+                fullWidth
+                helperText="Timestamp in seconds when the QR code link should be displayed"
+                inputProps={{ min: 0 }}
               />
 
               <Button

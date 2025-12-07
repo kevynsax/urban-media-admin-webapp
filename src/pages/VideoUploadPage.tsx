@@ -46,6 +46,7 @@ const VideoUploadPage = () => {
   const [selectedLinkId, setSelectedLinkId] = useState('');
   const [publishStatus, setPublishStatus] =
     useState<PublishStatus>('unpublished');
+  const [showLinkAt, setShowLinkAt] = useState(0);
 
   useEffect(() => {
     dispatch(fetchLinks());
@@ -84,6 +85,7 @@ const VideoUploadPage = () => {
           videoFile: selectedFile,
           linkToAction: selectedLinkId,
           publishStatus,
+          showLinkAt,
         })
       ).unwrap();
       dispatch(
@@ -247,6 +249,17 @@ const VideoUploadPage = () => {
                   </MenuItem>
                 ))}
               </TextField>
+
+              <TextField
+                label="Show Link At (seconds)"
+                type="number"
+                value={showLinkAt}
+                onChange={(e) => setShowLinkAt(parseInt(e.target.value) || 0)}
+                fullWidth
+                disabled={isLoading}
+                helperText="Timestamp in seconds when the QR code link should be displayed"
+                inputProps={{ min: 0 }}
+              />
 
               {isLoading && (
                 <Box>

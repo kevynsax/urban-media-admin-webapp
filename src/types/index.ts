@@ -42,6 +42,7 @@ export interface Video {
   videoUrl: string;
   linkToAction: string;
   publishStatus: PublishStatus;
+  showLinkAt: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -68,6 +69,7 @@ export interface LoginResponse {
 export interface UpdateVideoStatusRequest {
   publishStatus: PublishStatus;
   linkToAction: string;
+  showLinkAt: number;
 }
 
 export interface UploadProgress {

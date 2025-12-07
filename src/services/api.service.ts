@@ -82,6 +82,7 @@ class ApiService {
             formData.append('video', dto.videoFile);
             formData.append('linkToAction', dto.linkToAction);
             formData.append('publishStatus', dto.publishStatus);
+            formData.append('showLinkAt', dto.showLinkAt.toString());
             formData.append('fileName', dto.videoFile.name)
 
             const onUploadProgress = (progressEvent: AxiosProgressEvent) => {
