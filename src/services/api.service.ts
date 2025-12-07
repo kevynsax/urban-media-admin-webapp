@@ -168,6 +168,17 @@ class ApiService {
                 }
                 throw err;
             })
+
+    public deleteLink = async (linkId: string): Promise<void> =>
+        this.api.delete<ApiResponse<unknown>>(`/links/${linkId}`)
+            .then(() => {})
+            .catch(err => {
+                if (axios.isAxiosError(err) && err.response?.data) {
+                    const apiError = err.response.data as ApiResponse<unknown>;
+                    throw new Error(apiError.message || 'Failed to delete link');
+                }
+                throw err;
+            })
 }
 
 export const apiService = new ApiService();

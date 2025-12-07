@@ -42,6 +42,20 @@ export const createLink = createAsyncThunk(
     }
 );
 
+export const deleteLink = createAsyncThunk(
+    'link/deleteLink',
+    async (linkId: string, { rejectWithValue }) => {
+        try {
+            await apiService.deleteLink(linkId);
+            return linkId;
+        } catch (error) {
+            return rejectWithValue(
+                error instanceof Error ? error.message : 'Failed to delete link'
+            );
+        }
+    }
+);
+
 const linkSlice = createSlice({
     name: 'link',
     initialState,
@@ -76,6 +90,16 @@ const linkSlice = createSlice({
             })
             .addCase(createLink.rejected, (state, action) => {
                 state.isLoading = false;
+                state.error = action.payload as string;
+            })
+            // Delete link
+            .addCase(deleteLink.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(deleteLink.fulfilled, (state, action) => {
+                state.links = state.links.filter((link) => link.id !== action.payload);
+            })
+            .addCase(deleteLink.rejected, (state, action) => {
                 state.error = action.payload as string;
             });
     },

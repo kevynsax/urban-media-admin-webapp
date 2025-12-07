@@ -17,10 +17,10 @@ import {
   Tooltip,
   Chip,
 } from '@mui/material';
-import { Add, ContentCopy, Link as LinkIcon, Download, QrCode, Visibility } from '@mui/icons-material';
+import { Add, ContentCopy, Link as LinkIcon, Download, QrCode, Visibility, Delete } from '@mui/icons-material';
 import { QRCodeCanvas } from 'qrcode.react';
 import type { RootState } from '../store';
-import { fetchLinks, createLink } from '../store/linkSlice';
+import { fetchLinks, createLink, deleteLink } from '../store/linkSlice';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { showAlert } from '../store/alertSlice';
 import { AppConfig } from '../config/app.config';
@@ -40,6 +40,8 @@ const LinksTab = () => {
   const [linkHits, setLinkHits] = useState<LinkHit[]>([]);
   const [loadingHits, setLoadingHits] = useState(false);
   const [hitsCache, setHitsCache] = useState<Record<string, number>>({});
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const qrRef = useRef<HTMLDivElement>(null);
 
@@ -156,6 +158,49 @@ const LinksTab = () => {
       setLinkHits([]);
     } finally {
       setLoadingHits(false);
+    }
+  };
+
+  const openDeleteDialog = (link: Link) => {
+    setSelectedLink(link);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteLink = async () => {
+    if (!selectedLink) return;
+
+    const hitCount = hitsCache[selectedLink.id] ?? 0;
+    if (hitCount > 0) {
+      dispatch(
+        showAlert({
+          message: 'Cannot delete link with existing hits',
+          severity: 'error',
+        })
+      );
+      setDeleteDialogOpen(false);
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await dispatch(deleteLink(selectedLink.id)).unwrap();
+      dispatch(
+        showAlert({
+          message: 'Link deleted successfully',
+          severity: 'success',
+        })
+      );
+      setDeleteDialogOpen(false);
+      setSelectedLink(null);
+    } catch (error) {
+      dispatch(
+        showAlert({
+          message: error as string,
+          severity: 'error',
+        })
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -278,6 +323,18 @@ const LinksTab = () => {
                       >
                         <ContentCopy />
                       </IconButton>
+                    </Tooltip>
+                    <Tooltip title={hitsCache[link.id] > 0 ? "Cannot delete link with hits" : "Delete link"}>
+                      <span>
+                        <IconButton
+                          onClick={() => openDeleteDialog(link)}
+                          color="error"
+                          size="small"
+                          disabled={hitsCache[link.id] > 0}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </span>
                     </Tooltip>
                   </Box>
                 </Box>
@@ -428,6 +485,37 @@ const LinksTab = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setHitsDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => !isDeleting && setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Delete Link</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete this link? This action cannot be undone.
+          </Typography>
+          {selectedLink && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              Target: {selectedLink.targetLink}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)} disabled={isDeleting}>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDeleteLink}
+            color="error"
+            variant="contained"
+            disabled={isDeleting}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
