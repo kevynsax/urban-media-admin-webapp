@@ -1,7 +1,7 @@
 {
   "name": "admin-webapp",
   "private": true,
-  "version": "2.0.4",
+  "version": "2.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,6 +16,7 @@
     "@mui/material": "^7.3.6",
     "@reduxjs/toolkit": "^2.11.0",
     "axios": "^1.13.2",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-redux": "^9.2.0",

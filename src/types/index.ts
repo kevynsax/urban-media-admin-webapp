@@ -7,6 +7,35 @@ export interface User {
 
 export type PublishStatus = 'published' | 'internal_only' | 'unpublished';
 
+export interface Link {
+  id: string;
+  targetLink: string;
+}
+
+export interface Address {
+  city: string;
+  country: string;
+  postal: string;
+  region: string;
+}
+
+export interface GeoLocation {
+  latitude: number;
+  longitude: number;
+}
+
+export interface LinkHit {
+  id: string;
+  videoId: string;
+  ipAddress: string;
+  address: Address;
+  geoLocation: GeoLocation;
+}
+
+export interface CreateLinkRequest {
+  targetLink: string;
+}
+
 export interface Video {
   id: string;
   fileName: string;

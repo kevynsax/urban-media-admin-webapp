@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import { Alert, Box } from '@mui/material';
@@ -7,6 +8,22 @@ import { hideAlert } from '../store/alertSlice';
 const AlertContainer = () => {
   const alerts = useSelector((state: RootState) => state.alert.alerts);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (alerts.length === 0) return;
+
+    // Auto-hide each alert after 5 seconds
+    const timers = alerts.map((alert) =>
+      setTimeout(() => {
+        dispatch(hideAlert(alert.id));
+      }, 5000)
+    );
+
+    // Cleanup timers on unmount or when alerts change
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+    };
+  }, [alerts, dispatch]);
 
   const handleClose = (id: string) => {
     dispatch(hideAlert(id));
@@ -41,6 +58,16 @@ const AlertContainer = () => {
               to: {
                 transform: 'translateX(0)',
                 opacity: 1,
+              },
+            },
+            '@keyframes fadeOut': {
+              from: {
+                opacity: 1,
+                transform: 'translateX(0)',
+              },
+              to: {
+                opacity: 0,
+                transform: 'translateX(100%)',
               },
             },
           }}

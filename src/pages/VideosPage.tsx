@@ -15,11 +15,15 @@ import {
   CircularProgress,
   Menu,
   MenuItem,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import {
   Add,
   Logout,
   FilterList,
+  VideoLibrary,
+  Link as LinkIcon,
 } from '@mui/icons-material';
 import type { RootState } from '../store';
 import { logout } from '../store/authSlice';
@@ -27,6 +31,7 @@ import { fetchVideos, clearError } from '../store/videoSlice';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { showAlert } from '../store/alertSlice';
 import type { PublishStatus, Video } from '../types';
+import LinksTab from './LinksTab';
 
 const statusColors: Record<PublishStatus, string> = {
   published: '#4caf50',
@@ -41,6 +46,7 @@ const statusLabels: Record<PublishStatus, string> = {
 };
 
 const VideosPage = () => {
+  const [activeTab, setActiveTab] = useState(0);
   const [filterStatus, setFilterStatus] = useState<PublishStatus | 'all'>('all');
   const [filterAnchorEl, setFilterAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -101,15 +107,27 @@ const VideosPage = () => {
       <AppBar position="static">
         <Toolbar>
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Videos
+            Urban Media
           </Typography>
-          <IconButton color="inherit" onClick={handleFilterClick}>
-            <FilterList />
-          </IconButton>
+          {activeTab === 0 && (
+            <IconButton color="inherit" onClick={handleFilterClick}>
+              <FilterList />
+            </IconButton>
+          )}
           <IconButton color="inherit" onClick={handleLogout}>
             <Logout />
           </IconButton>
         </Toolbar>
+        <Tabs
+          value={activeTab}
+          onChange={(_, newValue) => setActiveTab(newValue)}
+          textColor="inherit"
+          indicatorColor="secondary"
+          sx={{ bgcolor: 'rgba(0,0,0,0.1)' }}
+        >
+          <Tab icon={<VideoLibrary />} label="Videos" iconPosition="start" />
+          <Tab icon={<LinkIcon />} label="Links" iconPosition="start" />
+        </Tabs>
       </AppBar>
 
       <Menu
@@ -132,51 +150,53 @@ const VideosPage = () => {
       </Menu>
 
       <Box sx={{ p: 3, pb: 10 }}>
-        {filterStatus !== 'all' && (
-          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Chip
-              label={`Filter: ${statusLabels[filterStatus]}`}
-              onDelete={() => setFilterStatus('all')}
-              color="primary"
-            />
-          </Box>
-        )}
+        {activeTab === 0 && (
+          <>
+            {filterStatus !== 'all' && (
+              <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Chip
+                  label={`Filter: ${statusLabels[filterStatus]}`}
+                  onDelete={() => setFilterStatus('all')}
+                  color="primary"
+                />
+              </Box>
+            )}
 
-        {isLoading && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              minHeight: 300,
-            }}
-          >
-            <CircularProgress />
-          </Box>
-        )}
+            {isLoading && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minHeight: 300,
+                }}
+              >
+                <CircularProgress />
+              </Box>
+            )}
 
-        {!isLoading && filteredVideos.length === 0 && (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              minHeight: 300,
-            }}
-          >
-            <Typography variant="h6" color="text.secondary">
-              No videos found
-            </Typography>
-          </Box>
-        )}
+            {!isLoading && filteredVideos.length === 0 && (
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  minHeight: 300,
+                }}
+              >
+                <Typography variant="h6" color="text.secondary">
+                  No videos found
+                </Typography>
+              </Box>
+            )}
 
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: 2,
-          }}
-        >
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                gap: 2,
+              }}
+            >
           {filteredVideos.map((video) => (
             <Card
               key={video.id}
@@ -219,19 +239,25 @@ const VideosPage = () => {
             </Card>
           ))}
         </Box>
+          </>
+        )}
+
+        {activeTab === 1 && <LinksTab />}
       </Box>
 
-      <Fab
-        color="primary"
-        sx={{
-          position: 'fixed',
-          bottom: 16,
-          right: 16,
-        }}
-        onClick={() => navigate('/videos/new')}
-      >
-        <Add />
-      </Fab>
+      {activeTab === 0 && (
+        <Fab
+          color="primary"
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+          }}
+          onClick={() => navigate('/videos/new')}
+        >
+          <Add />
+        </Fab>
+      )}
     </Box>
   );
 };

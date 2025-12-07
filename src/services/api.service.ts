@@ -8,6 +8,9 @@ import type {
     Video,
     UpdateVideoStatusRequest,
     UploadProgress,
+    Link,
+    CreateLinkRequest,
+    LinkHit,
 } from '../types';
 import type { CreateVideoDto } from '../types/createVideoDto.ts';
 
@@ -79,6 +82,7 @@ class ApiService {
             formData.append('video', dto.videoFile);
             formData.append('linkToAction', dto.linkToAction);
             formData.append('publishStatus', dto.publishStatus);
+            formData.append('fileName', dto.videoFile.name)
 
             const onUploadProgress = (progressEvent: AxiosProgressEvent) => {
                 if (!onProgress || !progressEvent.total)
@@ -127,6 +131,39 @@ class ApiService {
                 if (axios.isAxiosError(err) && err.response?.data) {
                     const apiError = err.response.data as ApiResponse<unknown>;
                     throw new Error(apiError.message || 'Failed to delete video');
+                }
+                throw err;
+            })
+
+    public getLinks = async (): Promise<Link[]> =>
+        this.api.get<ApiResponse<Link[]>>('/links')
+            .then(response => response.data.data || [])
+            .catch(err => {
+                if (axios.isAxiosError(err) && err.response?.data) {
+                    const apiError = err.response.data as ApiResponse<unknown>;
+                    throw new Error(apiError.message || 'Failed to fetch links');
+                }
+                throw err;
+            })
+
+    public createLink = async (data: CreateLinkRequest): Promise<Link> =>
+        this.api.post<ApiResponse<Link>>('/links', data)
+            .then(response => response.data.data as Link)
+            .catch(err => {
+                if (axios.isAxiosError(err) && err.response?.data) {
+                    const apiError = err.response.data as ApiResponse<unknown>;
+                    throw new Error(apiError.message || 'Failed to create link');
+                }
+                throw err;
+            })
+
+    public getLinkHits = async (linkId: string): Promise<LinkHit[]> =>
+        this.api.get<ApiResponse<LinkHit[]>>(`/links/${linkId}/hits`)
+            .then(response => response.data.data || [])
+            .catch(err => {
+                if (axios.isAxiosError(err) && err.response?.data) {
+                    const apiError = err.response.data as ApiResponse<unknown>;
+                    throw new Error(apiError.message || 'Failed to fetch link hits');
                 }
                 throw err;
             })

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,10 +14,12 @@ import {
   Button,
   LinearProgress,
   Paper,
+  CircularProgress,
 } from '@mui/material';
 import { ArrowBack, CloudUpload, VideoFile } from '@mui/icons-material';
 import type { RootState } from '../store';
 import { createVideo } from '../store/videoSlice';
+import { fetchLinks } from '../store/linkSlice';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { showAlert } from '../store/alertSlice';
 import type { PublishStatus } from '../types';
@@ -36,11 +38,18 @@ const VideoUploadPage = () => {
   const { isLoading, uploadProgress } = useSelector(
     (state: RootState) => state.video
   );
+  const { links, isLoading: linksLoading } = useSelector(
+    (state: RootState) => state.link
+  );
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [linkToAction, setLinkToAction] = useState('');
+  const [selectedLinkId, setSelectedLinkId] = useState('');
   const [publishStatus, setPublishStatus] =
     useState<PublishStatus>('unpublished');
+
+  useEffect(() => {
+    dispatch(fetchLinks());
+  }, [dispatch]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -73,7 +82,7 @@ const VideoUploadPage = () => {
       await dispatch(
         createVideo({
           videoFile: selectedFile,
-          linkToAction,
+          linkToAction: selectedLinkId,
           publishStatus,
         })
       ).unwrap();
@@ -194,14 +203,33 @@ const VideoUploadPage = () => {
                 </Paper>
               )}
 
-              <TextField
-                label="Link to Action"
-                value={linkToAction}
-                onChange={(e) => setLinkToAction(e.target.value)}
-                fullWidth
-                placeholder="https://example.com"
-                disabled={isLoading}
-              />
+              {linksLoading ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <CircularProgress size={20} />
+                  <Typography variant="body2" color="text.secondary">
+                    Loading links...
+                  </Typography>
+                </Box>
+              ) : (
+                <TextField
+                  select
+                  label="Link to Action"
+                  value={selectedLinkId}
+                  onChange={(e) => setSelectedLinkId(e.target.value)}
+                  fullWidth
+                  disabled={isLoading}
+                  helperText={links.length === 0 ? 'No links available. Create a link first.' : ''}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {links.map((link) => (
+                    <MenuItem key={link.id} value={link.id}>
+                      {link.targetLink} (ID: {link.id.slice(0, 8)}...)
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
 
               <TextField
                 select
