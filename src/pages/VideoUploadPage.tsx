@@ -23,6 +23,7 @@ import { fetchLinks } from '../store/linkSlice';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { showAlert } from '../store/alertSlice';
 import type { PublishStatus } from '../types';
+import QRCodePositionHelper from '../components/QRCodePositionHelper';
 
 const statusOptions = [
   { value: 'published', label: 'Published' },
@@ -43,10 +44,11 @@ const VideoUploadPage = () => {
   );
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string>('');
   const [selectedLinkId, setSelectedLinkId] = useState('');
   const [publishStatus, setPublishStatus] =
     useState<PublishStatus>('unpublished');
-  const [showLinkAt, setShowLinkAt] = useState(0);
+  const [showLinkAt, setShowLinkAt] = useState<number | ''>('');
   const [qrCodeX, setQrCodeX] = useState(0.15);
   const [qrCodeY, setQrCodeY] = useState(0.15);
   const [qrCodeSize, setQrCodeSize] = useState(0.15);
@@ -54,6 +56,19 @@ const VideoUploadPage = () => {
   useEffect(() => {
     dispatch(fetchLinks());
   }, [dispatch]);
+
+  // Create and cleanup video preview URL
+  useEffect(() => {
+    if (selectedFile) {
+      const url = URL.createObjectURL(selectedFile);
+      setVideoPreviewUrl(url);
+      return () => {
+        URL.revokeObjectURL(url);
+      };
+    } else {
+      setVideoPreviewUrl('');
+    }
+  }, [selectedFile]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -88,7 +103,7 @@ const VideoUploadPage = () => {
           videoFile: selectedFile,
           idLink: selectedLinkId,
           publishStatus,
-          showLinkAt,
+          showLinkAt: showLinkAt === '' ? 0 : showLinkAt,
           qrCodeX,
           qrCodeY,
           qrCodeSize,
@@ -261,55 +276,34 @@ const VideoUploadPage = () => {
                 type="number"
                 value={showLinkAt}
                 onChange={(e) => {
-                  const val = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
-                  if (!isNaN(val)) setShowLinkAt(val);
+                  const val = e.target.value;
+                  if (val === '') {
+                    setShowLinkAt('');
+                  } else {
+                    const numVal = parseFloat(val);
+                    if (!isNaN(numVal)) {
+                      setShowLinkAt(Math.round(numVal * 100) / 100);
+                    }
+                  }
                 }}
                 fullWidth
                 disabled={isLoading}
-                helperText="Timestamp in seconds when the QR code link should be displayed"
-                inputProps={{ min: 0 }}
+                helperText="Timestamp in seconds when the QR code link should be displayed (supports up to 2 decimal places)"
+                inputProps={{ min: 0, step: 0.01 }}
               />
 
-              <TextField
-                label="QR Code X Position"
-                type="number"
-                value={qrCodeX}
-                onChange={(e) => {
-                  const val = e.target.value === '' ? 0.15 : parseFloat(e.target.value);
-                  if (!isNaN(val)) setQrCodeX(val);
+              <QRCodePositionHelper
+                qrCodeX={qrCodeX}
+                qrCodeY={qrCodeY}
+                qrCodeSize={qrCodeSize}
+                onPositionChange={(x, y) => {
+                  setQrCodeX(x);
+                  setQrCodeY(y);
                 }}
-                fullWidth
-                disabled={isLoading}
-                helperText="Horizontal position (0.0 = left, 1.0 = right, default: 0.15)"
-                inputProps={{ min: 0, max: 1, step: 0.01 }}
-              />
-
-              <TextField
-                label="QR Code Y Position"
-                type="number"
-                value={qrCodeY}
-                onChange={(e) => {
-                  const val = e.target.value === '' ? 0.15 : parseFloat(e.target.value);
-                  if (!isNaN(val)) setQrCodeY(val);
-                }}
-                fullWidth
-                disabled={isLoading}
-                helperText="Vertical position (0.0 = top, 1.0 = bottom, default: 0.15)"
-                inputProps={{ min: 0, max: 1, step: 0.01 }}
-              />
-
-              <TextField
-                label="QR Code Size"
-                type="number"
-                value={qrCodeSize}
-                onChange={(e) => {
-                  const val = e.target.value === '' ? 0.15 : parseFloat(e.target.value);
-                  if (!isNaN(val)) setQrCodeSize(val);
-                }}
-                fullWidth
-                disabled={isLoading}
-                helperText="Size relative to screen width (0.0-1.0, default: 0.15)"
-                inputProps={{ min: 0, max: 1, step: 0.01 }}
+                onSizeChange={setQrCodeSize}
+                linkUrl={selectedLinkId ? links.find(l => l.id === selectedLinkId)?.targetLink : undefined}
+                videoUrl={videoPreviewUrl}
+                showLinkAt={showLinkAt === '' ? 0 : showLinkAt}
               />
 
               {isLoading && (
