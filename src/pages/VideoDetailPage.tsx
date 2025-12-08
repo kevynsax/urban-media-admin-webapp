@@ -309,7 +309,10 @@ const VideoDetailPage = () => {
                 label="Show Link At (seconds)"
                 type="number"
                 value={showLinkAt}
-                onChange={(e) => setShowLinkAt(parseInt(e.target.value) || 0)}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? 0 : parseInt(e.target.value, 10);
+                  if (!isNaN(val)) setShowLinkAt(val);
+                }}
                 fullWidth
                 helperText="Timestamp in seconds when the QR code link should be displayed"
                 inputProps={{ min: 0 }}
@@ -319,7 +322,10 @@ const VideoDetailPage = () => {
                 label="QR Code X Position"
                 type="number"
                 value={qrCodeX}
-                onChange={(e) => setQrCodeX(parseFloat(e.target.value) || 0.15)}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? 0.15 : parseFloat(e.target.value);
+                  if (!isNaN(val)) setQrCodeX(val);
+                }}
                 fullWidth
                 disabled={isUpdating}
                 helperText="Horizontal position (0.0 = left, 1.0 = right, default: 0.15)"
@@ -330,7 +336,10 @@ const VideoDetailPage = () => {
                 label="QR Code Y Position"
                 type="number"
                 value={qrCodeY}
-                onChange={(e) => setQrCodeY(parseFloat(e.target.value) || 0.15)}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? 0.15 : parseFloat(e.target.value);
+                  if (!isNaN(val)) setQrCodeY(val);
+                }}
                 fullWidth
                 disabled={isUpdating}
                 helperText="Vertical position (0.0 = top, 1.0 = bottom, default: 0.15)"
@@ -341,7 +350,10 @@ const VideoDetailPage = () => {
                 label="QR Code Size"
                 type="number"
                 value={qrCodeSize}
-                onChange={(e) => setQrCodeSize(parseFloat(e.target.value) || 0.15)}
+                onChange={(e) => {
+                  const val = e.target.value === '' ? 0.15 : parseFloat(e.target.value);
+                  if (!isNaN(val)) setQrCodeSize(val);
+                }}
                 fullWidth
                 disabled={isUpdating}
                 helperText="Size relative to screen width (0.0-1.0, default: 0.15)"
