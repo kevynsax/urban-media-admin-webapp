@@ -117,16 +117,24 @@ class ApiService {
         }
     }
 
-    public updateVideoStatus = (id: string, data: UpdateVideoStatusRequest): Promise<Video> =>
-        this.api.put<ApiResponse<Video>>(`/videos/status/${id}`, data)
-            .then(x => x.data.data as Video)
-            .catch(err => {
-                if (axios.isAxiosError(err) && err.response?.data) {
-                    const apiError = err.response.data as ApiResponse<unknown>;
-                    throw new Error(apiError.message || 'Failed to update video');
-                }
-                throw err;
-            })
+    public updateVideoStatus = async (id: string, data: UpdateVideoStatusRequest): Promise<Video> => {
+        try {
+            await this.api.put<ApiResponse<Video>>(`/videos/status/${id}`, data);
+            // Backend doesn't return the updated video, so fetch it
+            const videos = await this.getVideos();
+            const updatedVideo = videos.find(v => v.id === id);
+            if (!updatedVideo) {
+                throw new Error('Video not found after update');
+            }
+            return updatedVideo;
+        } catch (err) {
+            if (axios.isAxiosError(err) && err.response?.data) {
+                const apiError = err.response.data as ApiResponse<unknown>;
+                throw new Error(apiError.message || 'Failed to update video');
+            }
+            throw err;
+        }
+    }
 
     public deleteVideo = async (id: string): Promise<void> =>
         this.api.delete<ApiResponse<unknown>>(`/videos/${id}`)
