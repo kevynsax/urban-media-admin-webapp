@@ -24,6 +24,7 @@ import {
   updateVideoStatus,
   deleteVideo,
 } from '../store/videoSlice';
+import { fetchLinks } from '../store/linkSlice';
 import { useAppDispatch } from '../hooks/useAppDispatch';
 import { showAlert } from '../store/alertSlice';
 import type { PublishStatus } from '../types';
@@ -43,19 +44,33 @@ const VideoDetailPage = () => {
     state.video.videos.find((v) => v.id === id)
   );
 
+  const { links, isLoading: linksLoading } = useSelector(
+    (state: RootState) => state.link
+  );
+
   const [publishStatus, setPublishStatus] = useState<PublishStatus>(
     video?.publishStatus || 'unpublished'
   );
   const [linkToAction, setLinkToAction] = useState(video?.linkToAction || '');
   const [showLinkAt, setShowLinkAt] = useState(video?.showLinkAt || 0);
+  const [qrCodeX, setQrCodeX] = useState(video?.qrCodeX || 0.15);
+  const [qrCodeY, setQrCodeY] = useState(video?.qrCodeY || 0.15);
+  const [qrCodeSize, setQrCodeSize] = useState(video?.qrCodeSize || 0.15);
   const [isUpdating, setIsUpdating] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchLinks());
+  }, [dispatch]);
 
   useEffect(() => {
     if (video) {
       setPublishStatus(video.publishStatus);
       setLinkToAction(video.linkToAction);
       setShowLinkAt(video.showLinkAt || 0);
+      setQrCodeX(video.qrCodeX || 0.15);
+      setQrCodeY(video.qrCodeY || 0.15);
+      setQrCodeSize(video.qrCodeSize || 0.15);
     }
   }, [video]);
 
@@ -66,7 +81,7 @@ const VideoDetailPage = () => {
       await dispatch(
         updateVideoStatus({
           id,
-          data: { publishStatus, linkToAction, showLinkAt },
+          data: { publishStatus, linkToAction, showLinkAt, qrCodeX, qrCodeY, qrCodeSize },
         })
       ).unwrap();
       dispatch(
@@ -262,13 +277,33 @@ const VideoDetailPage = () => {
                 ))}
               </TextField>
 
-              <TextField
-                label="Link to Action"
-                value={linkToAction}
-                onChange={(e) => setLinkToAction(e.target.value)}
-                fullWidth
-                placeholder="https://example.com"
-              />
+              {linksLoading ? (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <CircularProgress size={20} />
+                  <Typography variant="body2" color="text.secondary">
+                    Loading links...
+                  </Typography>
+                </Box>
+              ) : (
+                <TextField
+                  select
+                  label="Link to Action"
+                  value={linkToAction}
+                  onChange={(e) => setLinkToAction(e.target.value)}
+                  fullWidth
+                  disabled={isUpdating}
+                  helperText={links.length === 0 ? 'No links available. Create a link first.' : ''}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {links.map((link) => (
+                    <MenuItem key={link.id} value={link.id}>
+                      {link.targetLink} (ID: {link.id.slice(0, 8)}...)
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
 
               <TextField
                 label="Show Link At (seconds)"
@@ -278,6 +313,39 @@ const VideoDetailPage = () => {
                 fullWidth
                 helperText="Timestamp in seconds when the QR code link should be displayed"
                 inputProps={{ min: 0 }}
+              />
+
+              <TextField
+                label="QR Code X Position"
+                type="number"
+                value={qrCodeX}
+                onChange={(e) => setQrCodeX(parseFloat(e.target.value) || 0.15)}
+                fullWidth
+                disabled={isUpdating}
+                helperText="Horizontal position (0.0 = left, 1.0 = right, default: 0.15)"
+                inputProps={{ min: 0, max: 1, step: 0.01 }}
+              />
+
+              <TextField
+                label="QR Code Y Position"
+                type="number"
+                value={qrCodeY}
+                onChange={(e) => setQrCodeY(parseFloat(e.target.value) || 0.15)}
+                fullWidth
+                disabled={isUpdating}
+                helperText="Vertical position (0.0 = top, 1.0 = bottom, default: 0.15)"
+                inputProps={{ min: 0, max: 1, step: 0.01 }}
+              />
+
+              <TextField
+                label="QR Code Size"
+                type="number"
+                value={qrCodeSize}
+                onChange={(e) => setQrCodeSize(parseFloat(e.target.value) || 0.15)}
+                fullWidth
+                disabled={isUpdating}
+                helperText="Size relative to screen width (0.0-1.0, default: 0.15)"
+                inputProps={{ min: 0, max: 1, step: 0.01 }}
               />
 
               <Button

@@ -47,6 +47,9 @@ const VideoUploadPage = () => {
   const [publishStatus, setPublishStatus] =
     useState<PublishStatus>('unpublished');
   const [showLinkAt, setShowLinkAt] = useState(0);
+  const [qrCodeX, setQrCodeX] = useState(0.15);
+  const [qrCodeY, setQrCodeY] = useState(0.15);
+  const [qrCodeSize, setQrCodeSize] = useState(0.15);
 
   useEffect(() => {
     dispatch(fetchLinks());
@@ -83,9 +86,12 @@ const VideoUploadPage = () => {
       await dispatch(
         createVideo({
           videoFile: selectedFile,
-          linkToAction: selectedLinkId,
+          idLink: selectedLinkId,
           publishStatus,
           showLinkAt,
+          qrCodeX,
+          qrCodeY,
+          qrCodeSize,
         })
       ).unwrap();
       dispatch(
@@ -259,6 +265,39 @@ const VideoUploadPage = () => {
                 disabled={isLoading}
                 helperText="Timestamp in seconds when the QR code link should be displayed"
                 inputProps={{ min: 0 }}
+              />
+
+              <TextField
+                label="QR Code X Position"
+                type="number"
+                value={qrCodeX}
+                onChange={(e) => setQrCodeX(parseFloat(e.target.value) || 0.15)}
+                fullWidth
+                disabled={isLoading}
+                helperText="Horizontal position (0.0 = left, 1.0 = right, default: 0.15)"
+                inputProps={{ min: 0, max: 1, step: 0.01 }}
+              />
+
+              <TextField
+                label="QR Code Y Position"
+                type="number"
+                value={qrCodeY}
+                onChange={(e) => setQrCodeY(parseFloat(e.target.value) || 0.15)}
+                fullWidth
+                disabled={isLoading}
+                helperText="Vertical position (0.0 = top, 1.0 = bottom, default: 0.15)"
+                inputProps={{ min: 0, max: 1, step: 0.01 }}
+              />
+
+              <TextField
+                label="QR Code Size"
+                type="number"
+                value={qrCodeSize}
+                onChange={(e) => setQrCodeSize(parseFloat(e.target.value) || 0.15)}
+                fullWidth
+                disabled={isLoading}
+                helperText="Size relative to screen width (0.0-1.0, default: 0.15)"
+                inputProps={{ min: 0, max: 1, step: 0.01 }}
               />
 
               {isLoading && (

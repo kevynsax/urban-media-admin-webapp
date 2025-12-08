@@ -43,6 +43,9 @@ export interface Video {
   linkToAction: string;
   publishStatus: PublishStatus;
   showLinkAt: number;
+  qrCodeX: number;
+  qrCodeY: number;
+  qrCodeSize: number;
   createdAt: string;
   updatedAt: string;
 }
@@ -70,6 +73,9 @@ export interface UpdateVideoStatusRequest {
   publishStatus: PublishStatus;
   linkToAction: string;
   showLinkAt: number;
+  qrCodeX: number;
+  qrCodeY: number;
+  qrCodeSize: number;
 }
 
 export interface UploadProgress {

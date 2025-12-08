@@ -80,9 +80,12 @@ class ApiService {
         try {
             const formData = new FormData();
             formData.append('video', dto.videoFile);
-            formData.append('linkToAction', dto.linkToAction);
+            formData.append('idLink', dto.idLink);
             formData.append('publishStatus', dto.publishStatus);
             formData.append('showLinkAt', dto.showLinkAt.toString());
+            formData.append('qrCodeX', dto.qrCodeX.toString());
+            formData.append('qrCodeY', dto.qrCodeY.toString());
+            formData.append('qrCodeSize', dto.qrCodeSize.toString());
             formData.append('fileName', dto.videoFile.name)
 
             const onUploadProgress = (progressEvent: AxiosProgressEvent) => {
